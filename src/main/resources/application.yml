@@ -2,7 +2,7 @@ spring:
   application:
     name: wvp
   profiles:
-    active: local
+    active: dev-kerry
   # flayway相关配置
   flyway:
     enabled: true   #是否启用flyway(默认true)

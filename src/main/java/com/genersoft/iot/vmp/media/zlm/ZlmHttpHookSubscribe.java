@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * ZLMediaServer的hook事件订阅
+ *
  * @author lin
  */
 @Component
@@ -25,11 +26,11 @@ public class ZlmHttpHookSubscribe {
     private final static Logger logger = LoggerFactory.getLogger(ZlmHttpHookSubscribe.class);
 
     @FunctionalInterface
-    public interface Event{
+    public interface Event {
         void response(MediaServerItem mediaServerItem, JSONObject response);
     }
 
-    private Map<HookType, Map<IHookSubscribe, ZlmHttpHookSubscribe.Event>> allSubscribes = new ConcurrentHashMap<>();
+    private final Map<HookType, Map<IHookSubscribe, ZlmHttpHookSubscribe.Event>> allSubscribes = new ConcurrentHashMap<>();
 
     public void addSubscribe(IHookSubscribe hookSubscribe, ZlmHttpHookSubscribe.Event event) {
         if (hookSubscribe.getExpires() == null) {
@@ -41,7 +42,7 @@ public class ZlmHttpHookSubscribe {
     }
 
     public ZlmHttpHookSubscribe.Event sendNotify(HookType type, JSONObject hookResponse) {
-        ZlmHttpHookSubscribe.Event event= null;
+        ZlmHttpHookSubscribe.Event event = null;
         Map<IHookSubscribe, Event> eventMap = allSubscribes.get(type);
         if (eventMap == null) {
             return null;
@@ -51,7 +52,7 @@ public class ZlmHttpHookSubscribe {
             for (String s : key.getContent().keySet()) {
                 if (result == null) {
                     result = key.getContent().getString(s).equals(hookResponse.getString(s));
-                }else {
+                } else {
                     if (key.getContent().getString(s) == null) {
                         continue;
                     }
@@ -84,14 +85,14 @@ public class ZlmHttpHookSubscribe {
                 for (String s : content.keySet()) {
                     if (result == null) {
                         result = content.getString(s).equals(hookSubscribe.getContent().getString(s));
-                    }else {
+                    } else {
                         if (content.getString(s) == null) {
                             continue;
                         }
                         result = result && content.getString(s).equals(hookSubscribe.getContent().getString(s));
                     }
                 }
-                if (result){
+                if (result) {
                     entriesToRemove.add(entry);
                 }
             }
@@ -107,6 +108,7 @@ public class ZlmHttpHookSubscribe {
 
     /**
      * 获取某个类型的所有的订阅
+     *
      * @param type
      * @return
      */
@@ -122,7 +124,7 @@ public class ZlmHttpHookSubscribe {
         return result;
     }
 
-    public List<IHookSubscribe> getAll(){
+    public List<IHookSubscribe> getAll() {
         ArrayList<IHookSubscribe> result = new ArrayList<>();
         Collection<Map<IHookSubscribe, Event>> values = allSubscribes.values();
         for (Map<IHookSubscribe, Event> value : values) {
@@ -134,8 +136,8 @@ public class ZlmHttpHookSubscribe {
     /**
      * 对订阅数据进行过期清理
      */
-    @Scheduled(cron="0 0/5 * * * ?")   //每5分钟执行一次
-    public void execute(){
+    @Scheduled(cron = "0 0/5 * * * ?")   //每5分钟执行一次
+    public void execute() {
 
         Instant instant = Instant.now().minusMillis(TimeUnit.MINUTES.toMillis(5));
         int total = 0;
@@ -146,7 +148,7 @@ public class ZlmHttpHookSubscribe {
                     if (hookSubscribe.getExpires().isBefore(instant)) {
                         // 过期的
                         hookSubscribeEventMap.remove(hookSubscribe);
-                        total ++;
+                        total++;
                     }
                 }
             }
